@@ -1,0 +1,6 @@
+/home/jonatasroot/Documentos/workspace/cpp/clang/gbemu/build/CMakeFiles/gbemu.dir
+/home/jonatasroot/Documentos/workspace/cpp/clang/gbemu/build/CMakeFiles/gbemulator.dir
+/home/jonatasroot/Documentos/workspace/cpp/clang/gbemu/build/CMakeFiles/tests.dir
+/home/jonatasroot/Documentos/workspace/cpp/clang/gbemu/build/CMakeFiles/test.dir
+/home/jonatasroot/Documentos/workspace/cpp/clang/gbemu/build/CMakeFiles/edit_cache.dir
+/home/jonatasroot/Documentos/workspace/cpp/clang/gbemu/build/CMakeFiles/rebuild_cache.dir

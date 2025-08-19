@@ -1,0 +1,33 @@
+Start testing: Aug 19 20:20 -03
+----------------------------------------------------------
+1/1 Testing: unit_tests
+1/1 Test: unit_tests
+Command: "/home/jonatasroot/Documentos/workspace/cpp/clang/gbemu/build/tests"
+Directory: /home/jonatasroot/Documentos/workspace/cpp/clang/gbemu/build
+"unit_tests" start time: Aug 19 20:20 -03
+Output:
+----------------------------------------------------------
+[1;36mSUITE: Instrunctions SUITE
+[0m[1;37m	TEST:[0m Should Load Register 8 bits into Register 8 bits...
+[1;32m	PASS:[0m Should Load Register 8 bits into Register 8 bits
+[1;37m	TEST:[0m Should Load data n into Register 8 bits...
+[1;32m	PASS:[0m Should Load data n into Register 8 bits
+[1;37m	TEST:[0m Should Load value in memory address Register HL into Register 8 bits...
+[1;32m	PASS:[0m Should Load value in memory address Register HL into Register 8 bits
+[1;37m	TEST:[0m Should Load value in memory address Register PC into Register 16 bits...
+[1;32m	PASS:[0m Should Load value in memory address Register PC into Register 16 bits
+[1;37m	TEST:[0m Should Load value in memory address Register A into Register 16 bits...
+[1;32m	PASS:[0m Should Load value in memory address Register A into Register 16 bits
+[1;37m	TEST:[0m Should Load value in memory address Register 16 bit into Register 8 bit A...
+[1;32m	PASS:[0m Should Load value in memory address Register 16 bit into Register 8 bit A
+[1;36mFINISH SUITE: Instrunctions SUITE
+[0m
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"unit_tests" end time: Aug 19 20:20 -03
+"unit_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Aug 19 20:20 -03

@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/tests.dir/link.d CMakeFiles/tests.dir/test/core/instructions_test.c.o CMakeFiles/tests.dir/test/suite_test.c.o -o tests  libgbemu.a
