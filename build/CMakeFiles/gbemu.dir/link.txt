@@ -1,2 +1,0 @@
-/usr/bin/ar qc libgbemu.a CMakeFiles/gbemu.dir/src/core/bus.c.o CMakeFiles/gbemu.dir/src/core/sm83.c.o CMakeFiles/gbemu.dir/src/external/cartridger.c.o CMakeFiles/gbemu.dir/src/main.c.o
-/usr/bin/ranlib libgbemu.a

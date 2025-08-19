@@ -1,1 +1,0 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/gbemulator.dir/link.d CMakeFiles/gbemulator.dir/src/main.c.o -o gbemulator  libgbemu.a
