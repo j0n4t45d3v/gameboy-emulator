@@ -1,4 +1,4 @@
-buildsw/
+build/
 .cache/
 roms/
 *.pdf
