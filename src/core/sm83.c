@@ -87,6 +87,16 @@ const execute_t DECODER[NUMBER_OF_THE_INSTRUCTIONS] = {
     [0x5E] = LD_r_HL,
     [0x6E] = LD_r_HL,
     [0x7E] = LD_r_HL,
+
+    [0x36] = LD_HL_n,
+
+    [0x70] = LD_HL_r ,
+    [0x71] = LD_HL_r ,
+    [0x72] = LD_HL_r ,
+    [0x73] = LD_HL_r ,
+    [0x74] = LD_HL_r ,
+    [0x75] = LD_HL_r ,
+    [0x77] = LD_HL_r   
 };
 
 sm83_t *init() {
@@ -405,4 +415,25 @@ uint8_t LD_HL_n(sm83_t *cpu, bus_t *busAddr) {
   uint8_t value = read_bus(busAddr, cpu->PC.value);
   write_bus(busAddr, cpu->HL.value, value);
   return 3;
+}
+
+#define NUM_ACTIONS 8
+#define MASK_LSB_8BIT 0x0F
+
+uint8_t LD_HL_r(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t data[NUM_ACTIONS] = {
+    [0x00] = cpu->BC.msb,
+    [0x01] = cpu->BC.lsb,
+    [0x02] = cpu->DE.msb,
+    [0x03] = cpu->DE.lsb,
+    [0x04] = cpu->HL.msb,
+    [0x05] = cpu->HL.lsb,
+    [0x07] = cpu->AF.msb
+  };
+
+  uint8_t index = cpu->opcode & MASK_LSB_8BIT;
+  if(index >= 0 && index < NUM_ACTIONS && index != 0x06) {
+    write_bus(busAddr, cpu->HL.value, data[index]);
+  }
+  return 2;
 }
