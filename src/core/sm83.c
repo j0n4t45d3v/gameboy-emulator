@@ -401,7 +401,7 @@ uint8_t LD_r_HL(sm83_t *cpu, bus_t *busAddr) {
   return 2;
 }
 
-uint8_t LD_HL_r(sm83_t *cpu, bus_t *busAddr) {
+uint8_t LD_HL_n(sm83_t *cpu, bus_t *busAddr) {
   uint8_t value = read_bus(busAddr, cpu->PC.value);
   write_bus(busAddr, cpu->HL.value, value);
   return 3;

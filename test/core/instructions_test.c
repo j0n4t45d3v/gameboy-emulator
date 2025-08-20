@@ -17,7 +17,7 @@ void test_LD_r_HL(sm83_t *cpu, bus_t *bus);
 void test_LD_rr_nn(sm83_t *cpu, bus_t *bus);
 void test_LD_rr_A(sm83_t *cpu, bus_t *bus);
 void test_LD_A_rr(sm83_t *cpu, bus_t *bus);
-void test_LD_HL_r(sm83_t *cpu, bus_t *bus);
+void test_LD_HL_n(sm83_t *cpu, bus_t *bus);
 
 void tearDown();
 
@@ -31,7 +31,7 @@ void run_instruction_suite() {
     test_LD_rr_nn(cpu, bus);
     test_LD_rr_A(cpu, bus);
     test_LD_A_rr(cpu, bus);
-    test_LD_HL_r(cpu, bus);
+    test_LD_HL_n(cpu, bus);
   });
   tearDown();
 }
@@ -138,14 +138,14 @@ void test_LD_A_rr(sm83_t *cpu, bus_t *bus) {
   });
 }
 
-void test_LD_HL_r(sm83_t *cpu, bus_t *bus) {
+void test_LD_HL_n(sm83_t *cpu, bus_t *bus) {
   TEST("Should Load value in memory address PC Register 16 bit into HL address", {
     cpu->opcode = 0x36;
     cpu->PC.value = 0x0000;
     cpu->HL.value = 0x0001;
     write_bus(bus, cpu->PC.value, 0xA4);
     // cpu->AF.msb = 0xF3;
-    uint8_t clocks = LD_HL_r(cpu, bus);
+    uint8_t clocks = LD_HL_n(cpu, bus);
     ASSERT_EQ_NUM(3, clocks);
     ASSERT_EQ_HEX(0xA4, read_bus(bus, 0x0001));
   });
