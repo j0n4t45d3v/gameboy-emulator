@@ -18,6 +18,7 @@ void test_LD_rr_nn(sm83_t *cpu, bus_t *bus);
 void test_LD_rr_A(sm83_t *cpu, bus_t *bus);
 void test_LD_A_rr(sm83_t *cpu, bus_t *bus);
 void test_LD_HL_n(sm83_t *cpu, bus_t *bus);
+void test_LD_HL_r(sm83_t *cpu, bus_t *bus);
 
 void tearDown();
 
@@ -32,6 +33,7 @@ void run_instruction_suite() {
     test_LD_rr_A(cpu, bus);
     test_LD_A_rr(cpu, bus);
     test_LD_HL_n(cpu, bus);
+    test_LD_HL_r(cpu, bus);
   });
   tearDown();
 }
@@ -148,6 +150,17 @@ void test_LD_HL_n(sm83_t *cpu, bus_t *bus) {
     uint8_t clocks = LD_HL_n(cpu, bus);
     ASSERT_EQ_NUM(3, clocks);
     ASSERT_EQ_HEX(0xA4, read_bus(bus, 0x0001));
+  });
+}
+
+void test_LD_HL_r(sm83_t *cpu, bus_t *bus) {
+  TEST("Should Load value in Register 8 bit into HL address", {
+    cpu->opcode = 0x70;
+    cpu->BC.value = 0xE600;
+    cpu->HL.value = 0x0000;
+    uint8_t clocks = LD_HL_r(cpu, bus);
+    ASSERT_EQ_NUM(2, clocks);
+    ASSERT_EQ_HEX(0xE6, read_bus(bus, cpu->HL.value));
   });
 }
 
