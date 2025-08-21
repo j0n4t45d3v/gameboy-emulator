@@ -1,4 +1,6 @@
 #include "gbemu/core/sm83.h"
+#include "gbemu/common/bitwise.h"
+#include "gbemu/common/logger.h"
 #include "gbemu/core/bus.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -90,13 +92,16 @@ const execute_t DECODER[NUMBER_OF_THE_INSTRUCTIONS] = {
 
     [0x36] = LD_HL_n,
 
-    [0x70] = LD_HL_r ,
-    [0x71] = LD_HL_r ,
-    [0x72] = LD_HL_r ,
-    [0x73] = LD_HL_r ,
-    [0x74] = LD_HL_r ,
-    [0x75] = LD_HL_r ,
-    [0x77] = LD_HL_r   
+    [0x70] = LD_HL_r,
+    [0x71] = LD_HL_r,
+    [0x72] = LD_HL_r,
+    [0x73] = LD_HL_r,
+    [0x74] = LD_HL_r,
+    [0x75] = LD_HL_r,
+    [0x77] = LD_HL_r, 
+
+    [0xEA] = LD_nn_A,
+    [0xFA] = LD_A_nn,
 };
 
 sm83_t *init() {
@@ -114,8 +119,10 @@ sm83_t *init() {
 }
 
 void clock(sm83_t *cpu, bus_t *busAddr) {
-  cpu->clocks += fetch(cpu, busAddr);
-  cpu->clocks += execute(cpu, busAddr);
+  do {
+    fetch(cpu, busAddr);
+    cpu->clocks += execute(cpu, busAddr);
+  } while (cpu->clocks > 0);
 }
 
 uint8_t fetch(sm83_t *cpu, bus_t *busAddr) {
@@ -436,4 +443,18 @@ uint8_t LD_HL_r(sm83_t *cpu, bus_t *busAddr) {
     write_bus(busAddr, cpu->HL.value, data[index]);
   }
   return 2;
+}
+
+uint8_t LD_nn_A(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t nn_lsb = read_bus(busAddr, cpu->PC.value++);
+  uint8_t nn_msb = read_bus(busAddr, cpu->PC.value++);
+  write_bus(busAddr, UNSIGNED_16(nn_msb, nn_lsb), cpu->AF.msb);
+  return 4;
+}
+
+uint8_t LD_A_nn(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t nn_lsb = read_bus(busAddr, cpu->PC.value++);
+  uint8_t nn_msb = read_bus(busAddr, cpu->PC.value++);
+  cpu->AF.msb = read_bus(busAddr, UNSIGNED_16(nn_msb, nn_lsb));
+  return 4;
 }

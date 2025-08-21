@@ -49,6 +49,8 @@ uint8_t XXX(sm83_t*, bus_t*);
 uint8_t LD_rr_nn(sm83_t*, bus_t*);
 uint8_t LD_rr_A(sm83_t*, bus_t*);
 uint8_t LD_A_rr(sm83_t*, bus_t*);
+uint8_t LD_nn_A(sm83_t*, bus_t*);
+uint8_t LD_A_nn(sm83_t*, bus_t*);
 
 uint8_t LD_r_r(sm83_t*, bus_t*);
 uint8_t LD_r_n(sm83_t*, bus_t*);

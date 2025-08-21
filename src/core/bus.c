@@ -29,5 +29,5 @@ uint8_t write_bus(bus_t *busAddr, uint16_t addr, uint8_t value) {
   if (IS_EXTERNAL_RAM(addr)) {
     busAddr->cart->ram[addr] = value;
   }
-  return -1;
+  return 1;
 }
