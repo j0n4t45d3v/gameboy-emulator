@@ -19,6 +19,8 @@ void test_LD_rr_A(sm83_t *cpu, bus_t *bus);
 void test_LD_A_rr(sm83_t *cpu, bus_t *bus);
 void test_LD_HL_n(sm83_t *cpu, bus_t *bus);
 void test_LD_HL_r(sm83_t *cpu, bus_t *bus);
+void test_LD_nn_A(sm83_t *cpu, bus_t *bus);
+void test_LD_A_nn(sm83_t *cpu, bus_t *bus);
 
 void tearDown();
 
@@ -34,6 +36,8 @@ void run_instruction_suite() {
     test_LD_A_rr(cpu, bus);
     test_LD_HL_n(cpu, bus);
     test_LD_HL_r(cpu, bus);
+    test_LD_nn_A(cpu, bus);
+    test_LD_A_nn(cpu, bus);
   });
   tearDown();
 }
@@ -164,6 +168,35 @@ void test_LD_HL_r(sm83_t *cpu, bus_t *bus) {
   });
 }
 
+void test_LD_nn_A(sm83_t *cpu, bus_t *bus) {
+  TEST("Should Load value of the A Register 8 bit into nn address", {
+    cpu->opcode = 0x70;
+    cpu->AF.msb = 0x44;
+    cpu->PC.value = 0x0000;
+
+    write_bus(bus, 0, 0xFF);
+    write_bus(bus, 1, 0x00);
+    uint8_t clocks = LD_nn_A(cpu, bus);
+    ASSERT_EQ_NUM(4, clocks);
+    ASSERT_EQ_HEX(0x44, read_bus(bus, 0x00FF));
+  });
+}
+
+void test_LD_A_nn(sm83_t *cpu, bus_t *bus) {
+  TEST("Should Load nn address value into A Register 8 bit", {
+    cpu->opcode = 0x70;
+    cpu->AF.msb = 0x00;
+    cpu->PC.value = 0x0000;
+
+    write_bus(bus, 0, 0xFF);
+    write_bus(bus, 1, 0x33);
+    write_bus(bus, 0x33FF, 0xD3);
+
+    uint8_t clocks = LD_A_nn(cpu, bus);
+    ASSERT_EQ_NUM(4, clocks);
+    ASSERT_EQ_HEX(0xD3, cpu->AF.msb);
+  });
+}
 void tearDown() {
   /* CLEANUP */
   free(cart->bank00);
