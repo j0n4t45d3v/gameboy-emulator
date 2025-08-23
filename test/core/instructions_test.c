@@ -177,7 +177,7 @@ TEST(LDH_A_n, "Should Load nn address value into A Register 8 bit", {
   ASSERT_EQ_HEX(0xEE, cpu->AF.msb);
 })
 
-RUN_SUITE(instruction,  
+RUN_SUITE(instructions,  
   test_LD_r_r,
   test_LD_r_n,
   test_LD_r_HL,
