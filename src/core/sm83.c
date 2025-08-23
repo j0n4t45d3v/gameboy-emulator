@@ -1,6 +1,5 @@
 #include "gbemu/core/sm83.h"
 #include "gbemu/common/bitwise.h"
-#include "gbemu/common/logger.h"
 #include "gbemu/core/bus.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -102,6 +101,9 @@ const execute_t DECODER[NUMBER_OF_THE_INSTRUCTIONS] = {
 
     [0xEA] = LD_nn_A,
     [0xFA] = LD_A_nn,
+
+    [0xE0] = LDH_n_A,
+    [0xF0] = LDH_A_n,
 };
 
 sm83_t *init() {
@@ -457,4 +459,16 @@ uint8_t LD_A_nn(sm83_t *cpu, bus_t *busAddr) {
   uint8_t nn_msb = read_bus(busAddr, cpu->PC.value++);
   cpu->AF.msb = read_bus(busAddr, UNSIGNED_16(nn_msb, nn_lsb));
   return 4;
+}
+
+uint8_t LDH_n_A(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t lsb_n = read_bus(busAddr, cpu->PC.value);
+  write_bus(busAddr, UNSIGNED_16(0xFF, lsb_n), cpu->AF.msb);
+  return 3;
+}
+
+uint8_t LDH_A_n(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t lsb_n = read_bus(busAddr, cpu->PC.value);
+  cpu->AF.msb = read_bus(busAddr, UNSIGNED_16(0xFF, lsb_n));
+  return 3;
 }

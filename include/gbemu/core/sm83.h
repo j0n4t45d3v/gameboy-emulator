@@ -59,5 +59,8 @@ uint8_t LD_r_HL(sm83_t*, bus_t*);
 uint8_t LD_HL_r(sm83_t*, bus_t*);
 uint8_t LD_HL_n(sm83_t*, bus_t*);
 
+uint8_t LDH_n_A(sm83_t*, bus_t*);
+uint8_t LDH_A_n(sm83_t*, bus_t*);
+
 
 #endif // !SM83_H
