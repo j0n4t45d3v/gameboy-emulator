@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// COLORS
 #define RESET         "\033[0m"
 #define COLOR_RED     "\033[1;31m"
 #define COLOR_GREEN   "\033[1;32m"
@@ -15,16 +16,45 @@
 #define COLOR_CYAN    "\033[1;36m"
 #define COLOR_WHITE   "\033[1;37m"
 
+#define BEFORE_ALL(block)\
+void setUp() {\
+block\
+}
+
+#define AFTER_ALL(block)\
+void tearDown() {\
+block\
+}
+
+#define RUN_SUITE(suite_name, ...) \
+void run_##suite_name##_suite() {\
+  printf(COLOR_CYAN "SUITE: %s\n" RESET , #suite_name);\
+  setUp();\
+  /* TESTS */\
+  void (*tests[])(void) = { __VA_ARGS__ }; \
+  size_t num_tests = sizeof(tests) / sizeof(tests[0]); \
+  for(size_t i = 0; i < num_tests; i++) { \
+      tests[i](); \
+  } \
+  tearDown();\
+  printf(COLOR_CYAN "FINISH SUITE: %s\n" RESET , #suite_name);\
+}
+
 #define TEST_SUITE(name, block)\
 printf(COLOR_CYAN "SUITE: %s\n" RESET , name);\
+setUp();\
 block;\
+tearDown();\
 printf(COLOR_CYAN "FINISH SUITE: %s\n" RESET , name)
 
-#define TEST(name, block)\
-  printf(COLOR_WHITE "\tTEST:" RESET " %s...\n", name);\
-  block;\
-  printf(COLOR_GREEN "\tPASS:" RESET " %s\n", name)
+#define TEST(name, description, block)\
+  void test_##name(void) {\
+    printf(COLOR_WHITE "\tTEST:" RESET " %s...\n", description);\
+    block;\
+    printf(COLOR_GREEN "\tPASS:" RESET " %s\n", description);\
+  }
 
+// ASSERTS
 #define ASSERT_IS_NOT_NULL(target)\
   if(target == NULL)\
   {\
