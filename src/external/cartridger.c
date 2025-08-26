@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const string_t CART_TYPE_DECODER[0x0100] = {
+const string_t CART_TYPE_DECODER[CART_TYPE_DECODER_SIZE] = {
     [0x00] = "ROM ONLY",
     [0x01] = "MBC1",
     [0x02] = "MBC1+RAM",
@@ -50,22 +50,26 @@ void load_rom(cartridger_t* cart, string_t path_rom) {
   size_t romSize = ftell(rom);
   rewind(rom);
 
-  char *buffer = malloc(sizeof(char) * romSize);
-  fread(buffer, sizeof(char), romSize, rom);
+  size_t readBytes = fread(cart->bank00, sizeof(char), BANK_SIZE, rom);
+  if(readBytes < BANK_SIZE) {
+    memset(cart->bank00 + readBytes, 0, BANK_SIZE - readBytes);
+  }
+  readBytes = fread(cart->bank01NN, sizeof(char), BANK_SIZE, rom);
+  if(readBytes < BANK_SIZE) {
+    memset(cart->bank01NN + readBytes, 0, BANK_SIZE - readBytes);
+  }
 
-  uint8_t checksum_value = checksum(buffer);
-  if (checksum_value == buffer[CHECKSUM_EXPECTED_VALUE]) {
+  uint8_t checksum_value = checksum(cart->bank00);
+  if (checksum_value == cart->bank00[CHECKSUM_EXPECTED_VALUE]) {
     LOG_INFO("Checksum:  Rom Valida!");
   } else {
     LOG_INFO("Checksum:  Rom Inválida!");
     LOG_INFO("Checksum Value: %2x!", checksum_value);
-    LOG_INFO("0x014D Addr Value: %2x!", buffer[CHECKSUM_EXPECTED_VALUE]);
+    LOG_INFO("0x014D Addr Value: %2x!", cart->bank00[CHECKSUM_EXPECTED_VALUE]);
   }
 
   LOG_INFO("Tamanho da ROM: %zu kilo bytes", romSize);
-  LOG_INFO("Cartucho: %s", CART_TYPE_DECODER[buffer[ADDRR_CART_TYPE]]);
-
-  cart->bank00 = buffer;
+  LOG_INFO("Cartucho: %s", CART_TYPE_DECODER[cart->bank00[ADDR_CART_TYPE]]);
 }
 
 
