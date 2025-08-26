@@ -1,6 +1,7 @@
 .PHONY: all build test test-resume
 
 all: build
+	./build/gbemulator
 
 build: 
 	bash ./build.sh
