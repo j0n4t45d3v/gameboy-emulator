@@ -1,14 +1,12 @@
 #include "gbemutest/core/instructions_test.h"
 #include "gbemu/core/bus.h"
 #include "gbemu/core/sm83.h"
-#include "gbemu/external/cartridger.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include "test/unit.h"
 
-sm83_t *cpu;
-bus_t *bus;
-cartridger_t *cart;
+static sm83_t *cpu;
+static bus_t *bus;
 
 BEFORE_ALL({
   /* PREPARE ENVIROMENT */
@@ -22,9 +20,8 @@ BEFORE_ALL({
   cpu->clocks = 0x00;
 
   bus = malloc(sizeof(bus_t));
-  cart = malloc(sizeof(cartridger_t));
+  cartridger_t *cart = malloc(sizeof(cartridger_t));
   bus->cart = cart;
-  cart->bank00 = malloc(sizeof(char) * 5);
   cart->bank00[0] = 0xFF;
   cart->bank00[1] = 0xF0;
   cart->bank00[2] = 0x00;
@@ -34,8 +31,6 @@ BEFORE_ALL({
 
 AFTER_ALL({
   /* CLEANUP */
-  free(cart->bank00);
-  free(cart);
   free(bus);
   free(cpu);
 })
