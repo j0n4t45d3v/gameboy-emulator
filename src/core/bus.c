@@ -24,10 +24,10 @@ uint8_t read_bus(bus_t *busAddr, uint16_t addr) {
     return busAddr->oam[addr - START_ADDR_OBJECT_ATTR_MEMORY];
   }
   if (IS_IO_REGISTERS(addr)) {
-    return busAddr->oam[addr - START_ADDR_IO_REGISTERS];
+    return busAddr->io_register[addr - START_ADDR_IO_REGISTERS];
   }
   if (IS_INTERRUPT_ENABLE_REGISTER(addr)) {
-    return busAddr->oam[addr - START_END_ADDR_INTERRUPT_ENABLE_REGISTER];
+    return busAddr->ie_register;
   }
 
   return -1;
@@ -44,7 +44,7 @@ uint8_t write_bus(bus_t *busAddr, uint16_t addr, uint8_t value) {
     busAddr->vram[addr - START_ADDR_VIDEO_RAM] = value;
   }
   if (IS_EXTERNAL_RAM(addr)) {
-    busAddr->cart->ram[addr] = value;
+    busAddr->cart->ram[addr - START_ADDR_EXTERNAL_RAM] = value;
   }
   if (IS_WORK_RAM0(addr)) {
     busAddr->wram0[addr - START_ADDR_WORK_RAM0] = value;
@@ -56,10 +56,10 @@ uint8_t write_bus(bus_t *busAddr, uint16_t addr, uint8_t value) {
     busAddr->oam[addr - START_ADDR_OBJECT_ATTR_MEMORY] = value;
   }
   if (IS_IO_REGISTERS(addr)) {
-    busAddr->oam[addr - START_ADDR_IO_REGISTERS] = value;
+    busAddr->io_register[addr - START_ADDR_IO_REGISTERS] = value;
   }
   if (IS_INTERRUPT_ENABLE_REGISTER(addr)) {
-    busAddr->oam[addr - START_END_ADDR_INTERRUPT_ENABLE_REGISTER] = value;
+    busAddr->ie_register = value;
   }
   return 1;
 }
