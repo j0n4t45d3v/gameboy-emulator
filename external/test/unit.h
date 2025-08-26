@@ -17,12 +17,12 @@
 #define COLOR_WHITE   "\033[1;37m"
 
 #define BEFORE_ALL(block)\
-void setUp() {\
+static void setUp() {\
 block\
 }
 
 #define AFTER_ALL(block)\
-void tearDown() {\
+static void tearDown() {\
 block\
 }
 
