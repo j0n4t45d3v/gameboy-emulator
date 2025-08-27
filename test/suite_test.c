@@ -7,11 +7,11 @@
 
 int main(int argc, char *argv[]) {
   if (argc == 3 && strcmp("--suite", argv[1]) == 0) {
-    if (strcmp("instruction", argv[2])) {
+    if (strcmp("instruction", argv[2]) == 0) {
       run_instructions_suite();
-    } else if (strcmp("bus", argv[2])) {
+    } else if (strcmp("bus", argv[2]) == 0) {
       run_bus_suite();
-    } else if (strcmp("cartridger", argv[2])) {
+    } else if (strcmp("cartridger", argv[2]) == 0) {
       run_cartridger_suite();
     } else {
       printf("Invalid Suite!\n");
