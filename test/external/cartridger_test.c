@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 cartridger_t *cart;
-const char * PATH_ROM = "/home/jonatasroot/Documentos/workspace/cpp/clang/gbemu/roms/Tetris.gb";
+const char * PATH_ROM = "./roms/Tetris.gb";
 
 BEFORE_ALL(cart = (cartridger_t*)malloc(sizeof(cartridger_t));)
 
