@@ -172,6 +172,21 @@ TEST(LDH_A_n, "Should Load nn address value into A Register 8 bit", {
   ASSERT_EQ_HEX(0xEE, cpu->AF.msb);
 })
 
+//ARITHMETIC 
+TEST(INC_rr, "Should Load nn address value into A Register 8 bit", {
+  cpu->opcode = 0x03;
+  cpu->BC.value = 0x0000;
+  cpu->DE.value = 0x0000;
+  cpu->HL.value = 0x0000;
+  cpu->SP.value = 0x0000;
+  uint8_t clocks = INC_rr(cpu, bus);
+  ASSERT_EQ_NUM(2, clocks);
+  ASSERT_EQ_HEX(0x0001, cpu->BC.value);
+  ASSERT_EQ_HEX(0x0000, cpu->DE.value);
+  ASSERT_EQ_HEX(0x0000, cpu->HL.value);
+  ASSERT_EQ_HEX(0x0000, cpu->SP.value);
+})
+
 RUN_SUITE(instructions,  
   test_LD_r_r,
   test_LD_r_n,
@@ -184,6 +199,7 @@ RUN_SUITE(instructions,
   test_LD_nn_A,
   test_LD_A_nn,
   test_LDH_n_A,
-  test_LDH_A_n
+  test_LDH_A_n,
+  test_INC_rr
 );
 
