@@ -1,9 +1,12 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+#include "gbemu/common/types.h"
+#include <stdlib.h>
 #define ENABLE_LOGGING
 
 #include <stdio.h>
+#include <stdint.h>
 
 #define RESET "\033[0m"
 #define RED "\033[31m"
@@ -26,4 +29,12 @@
   #define LOG_DEBUG(fmt, ...)
 #endif
 
+static string_t bitsToString(uint8_t byte) {
+   char* buffer = malloc(sizeof(char) * 9);
+    for (int i = 7; i >= 0; i--) {
+        buffer[7-i] = ((byte >> i) & 1) + '0';  // converte 0/1 para caractere '0'/'1'
+    }
+    buffer[8] = '\0';  // null terminator
+  return buffer;
+}
 #endif // LOGGER_H
