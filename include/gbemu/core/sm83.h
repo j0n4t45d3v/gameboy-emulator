@@ -5,6 +5,21 @@
 #include <stdint.h>
 
 #define MASK_MSB_8BITS 0xF0
+#define MASK_LSB_8BITS 0x0F
+#define SM83_FREQUECY 4.194304
+#define XOR(r1, r2) r1 ^ r2
+#define HAS_HALF_CARRY_IN_SUB(r1, value) (r1 & MASK_LSB_8BITS) < value
+#define HAS_HALF_CARRY_IN_ADD(r1, r2) ((r1 & MASK_LSB_8BITS) + (r2 & MASK_LSB_8BITS)) > 0x0F
+
+#define Z_FLAG(flags) (cpu->AF.lsb & 0b10000000)
+#define N_FLAG(flags) (cpu->AF.lsb & 0b01000000)
+#define H_FLAG(flags) (cpu->AF.lsb & 0b00100000)
+#define C_FLAG(flags) (cpu->AF.lsb & 0b00010000)
+
+#define Z_FLAG_VALUE(flags) Z_FLAG(flags) >> 7
+#define N_FLAG_VALUE(flags) N_FLAG(flags) >> 6
+#define H_FLAG_VALUE(flags) H_FLAG(flags) >> 5
+#define C_FLAG_VALUE(flags) C_FLAG(flags) >> 4
 
 // REGISTERS 16 Bits
 
