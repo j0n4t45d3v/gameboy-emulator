@@ -173,7 +173,7 @@ TEST(LDH_A_n, "Should Load nn address value into A Register 8 bit", {
 })
 
 //ARITHMETIC 
-TEST(INC_rr, "Should Load nn address value into A Register 8 bit", {
+TEST(INC_rr, "Should Increment rr Register 16 bits", {
   cpu->opcode = 0x03;
   cpu->BC.value = 0x0000;
   cpu->DE.value = 0x0000;
