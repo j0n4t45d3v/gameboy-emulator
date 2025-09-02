@@ -187,6 +187,39 @@ TEST(INC_rr, "Should Increment rr Register 16 bits", {
   ASSERT_EQ_HEX(0x0000, cpu->SP.value);
 })
 
+TEST(DEC_r, "Should Decrement r Register 8 bits", {
+  cpu->opcode = 0x05;
+  cpu->BC.value = 0x0F00;
+  cpu->AF.value = 0x0000;
+  uint8_t clocks = DEC_r(cpu, bus);
+  ASSERT_EQ_NUM(1, clocks);
+  uint8_t flags = cpu->AF.lsb >> 4;
+  ASSERT_EQ_BINARY(0b0100, flags);
+  ASSERT_EQ_HEX(0x0E, cpu->BC.msb);
+  ASSERT_EQ_HEX(0x00, cpu->BC.lsb);
+  ASSERT_EQ_HEX(0x0E00, cpu->BC.value);
+
+  cpu->opcode = 0x05;
+  cpu->BC.value = 0x0100;
+  cpu->AF.value = 0x0000;
+  clocks = DEC_r(cpu, bus);
+  ASSERT_EQ_NUM(1, clocks);
+  flags = cpu->AF.lsb >> 4;
+  ASSERT_EQ_BINARY(0b1100, flags);
+  ASSERT_EQ_HEX(0x00, cpu->BC.msb);
+  ASSERT_EQ_HEX(0x00, cpu->BC.lsb);
+
+  cpu->opcode = 0x05;
+  cpu->BC.value = 0x0000;
+  cpu->AF.value = 0x0000;
+  clocks = DEC_r(cpu, bus);
+  ASSERT_EQ_NUM(1, clocks);
+  flags = cpu->AF.lsb >> 4;
+  ASSERT_EQ_BINARY(0b0110, flags);
+  ASSERT_EQ_HEX(0xFF, cpu->BC.msb);
+  ASSERT_EQ_HEX(0x00, cpu->BC.lsb);
+})
+
 RUN_SUITE(instructions,  
   test_LD_r_r,
   test_LD_r_n,
@@ -200,6 +233,7 @@ RUN_SUITE(instructions,
   test_LD_A_nn,
   test_LDH_n_A,
   test_LDH_A_n,
-  test_INC_rr
+  test_INC_rr,
+  test_DEC_r
 );
 
