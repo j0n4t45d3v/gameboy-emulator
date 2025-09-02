@@ -1,4 +1,4 @@
-.PHONY: all build test test-resume
+.PHONY: all build test test-verbose
 
 all: build
 	./build/gbemulator
