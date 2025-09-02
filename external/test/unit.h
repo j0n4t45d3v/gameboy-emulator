@@ -26,6 +26,16 @@ static void tearDown() {\
 block\
 }
 
+
+static char* convertToBits(unsigned char byte) {
+   char* buffer = malloc(sizeof(char) * 9);
+    for (int i = 7; i >= 0; i--) {
+        buffer[7-i] = ((byte >> i) & 1) + '0';  // converte 0/1 para caractere '0'/'1'
+    }
+    buffer[8] = '\0';  // null terminator
+  return buffer;
+}
+
 #define RUN_SUITE(suite_name, ...) \
 void run_##suite_name##_suite() {\
   printf(COLOR_CYAN "SUITE: %s\n" RESET , #suite_name);\
@@ -90,6 +100,16 @@ printf(COLOR_CYAN "FINISH SUITE: %s\n" RESET , name)
     printf(COLOR_WHITE "\t      Actual: %#X\n" RESET, target);\
     exit(1);\
   }
+
+#define ASSERT_EQ_BINARY(expected, target)\
+  if(expected != target)\
+  {\
+    printf(COLOR_RED "\tFAIL:" COLOR_WHITE " %s == %s, (line %d)\n" RESET, #expected, #target, __LINE__);\
+    printf(COLOR_WHITE "\t      Expected 0b%s\n" RESET, convertToBits(expected));\
+    printf(COLOR_WHITE "\t      Actual: 0b%s\n" RESET, convertToBits(target));\
+    exit(1);\
+  }
+
 
 #define ASSERT_EQ_STR(expected, target)\
 if(strcmp(expected,target) != 0)\
