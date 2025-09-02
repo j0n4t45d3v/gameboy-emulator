@@ -80,4 +80,6 @@ uint8_t LDH_A_n(sm83_t*, bus_t*);
 //ARITMETIC 16 bits
 uint8_t INC_rr(sm83_t*, bus_t*);
 
+//ARITMETIC 8 bits
+uint8_t DEC_r(sm83_t*, bus_t*);
 #endif // !SM83_H
