@@ -1,3 +1,4 @@
+#include "gbemutest/core/alu_test.h"
 #include "gbemutest/core/bus_test.h"
 #include "gbemutest/core/instructions_test.h"
 #include "gbemutest/external/cartridger_test.h"
@@ -13,6 +14,8 @@ int main(int argc, char *argv[]) {
       run_bus_suite();
     } else if (strcmp("cartridger", argv[2]) == 0) {
       run_cartridger_suite();
+    } else if (strcmp("alu", argv[2]) == 0) {
+      run_arithetic_logic_unit_suite();
     } else {
       printf("Invalid Suite!\n");
       return 1;
@@ -22,5 +25,6 @@ int main(int argc, char *argv[]) {
   run_instructions_suite();
   run_bus_suite();
   run_cartridger_suite();
+  run_arithetic_logic_unit_suite();
   return 0;
 }
