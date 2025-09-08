@@ -69,11 +69,71 @@ TEST(bitwise_XOR, "Should execute bitwise XOR in values", {
   ASSERT_FALSE(or_bitwise.has_half_carry);
 })
 
+TEST(rotate_left, "Should rotate bits position to left", {
+  alu_result_t rotate_left_first_case = alu_rotate_left(0b01011100);
+
+  ASSERT_EQ_BINARY(0b10111000, rotate_left_first_case.result);
+  ASSERT_FALSE(rotate_left_first_case.has_carry);
+  ASSERT_FALSE(rotate_left_first_case.has_half_carry);
+
+  alu_result_t rotate_left_second_case = alu_rotate_left(0b10111000);
+
+  ASSERT_EQ_BINARY(0b01110000, rotate_left_second_case.result);
+  ASSERT_TRUE(rotate_left_second_case.has_carry);
+  ASSERT_FALSE(rotate_left_second_case.has_half_carry);
+})
+
+TEST(rotate_left_circular, "Should cicle rotate bits position to left", {
+  alu_result_t rotate_left_first_case = alu_rotate_left_circular(0b01011100);
+
+  ASSERT_EQ_BINARY(0b10111000, rotate_left_first_case.result);
+  ASSERT_FALSE(rotate_left_first_case.has_carry);
+  ASSERT_FALSE(rotate_left_first_case.has_half_carry);
+
+  alu_result_t rotate_left_second_case = alu_rotate_left_circular(0b10111000);
+
+  ASSERT_EQ_BINARY(0b01110001, rotate_left_second_case.result);
+  ASSERT_TRUE(rotate_left_second_case.has_carry);
+  ASSERT_FALSE(rotate_left_second_case.has_half_carry);
+})
+
+TEST(rotate_right, "Should rotate bits position to right", {
+  alu_result_t rotate_right_first_case = alu_rotate_right(0b01011100);
+
+  ASSERT_EQ_BINARY(0b00101110, rotate_right_first_case.result);
+  ASSERT_FALSE(rotate_right_first_case.has_carry);
+  ASSERT_FALSE(rotate_right_first_case.has_half_carry);
+
+  alu_result_t rotate_right_second_case = alu_rotate_right(0b10111001);
+
+  ASSERT_EQ_BINARY(0b01011100, rotate_right_second_case.result);
+  ASSERT_TRUE(rotate_right_second_case.has_carry);
+  ASSERT_FALSE(rotate_right_second_case.has_half_carry);
+})
+
+TEST(rotate_right_circular, "Should cicle rotate bits position to right", {
+  alu_result_t rotate_right_first_case = alu_rotate_right_circular(0b01011100);
+
+  ASSERT_EQ_BINARY(0b00101110, rotate_right_first_case.result);
+  ASSERT_FALSE(rotate_right_first_case.has_carry);
+  ASSERT_FALSE(rotate_right_first_case.has_half_carry);
+
+  alu_result_t rotate_right_second_case = alu_rotate_right_circular(0b10111001);
+
+  ASSERT_EQ_BINARY(0b11011100, rotate_right_second_case.result);
+  ASSERT_TRUE(rotate_right_second_case.has_carry);
+  ASSERT_FALSE(rotate_right_second_case.has_half_carry);
+})
+
 RUN_SUITE(
   arithetic_logic_unit,
   test_addition,
   test_subtract,
   test_bitwise_AND,
   test_bitwise_OR,
-  test_bitwise_XOR
+  test_bitwise_XOR,
+  test_rotate_left,
+  test_rotate_left_circular,
+  test_rotate_right,
+  test_rotate_right_circular,
 )
