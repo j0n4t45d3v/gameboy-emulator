@@ -168,7 +168,17 @@ const instruction_t DECODER[NUMBER_OF_THE_INSTRUCTIONS] = {
     [0x07] = INSTRUCTION(RLCA),
 };
 
-static uint8_t* get_opcode_register(sm83_t *cpu, uint8_t index) {
+static reg16_t* get_opcode_register_16bits(sm83_t *cpu, uint8_t index) {
+  reg16_t *registers[4] = {
+    [0x0] = &cpu->BC,
+    [0x1] = &cpu->BC,
+    [0x2] = &cpu->DE,
+    [0x3] = &cpu->SP,
+  };
+  return registers[index];
+}
+
+static uint8_t* get_opcode_register_8bits(sm83_t *cpu, uint8_t index) {
   uint8_t *registers[8] = {
     [0x0] = &cpu->BC.msb,
     [0x1] = &cpu->BC.lsb,
@@ -288,21 +298,21 @@ uint8_t LD_A_rr(sm83_t *cpu, bus_t *busAddr) {
 }
 
 uint8_t LD_r_r(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t *main_reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
-  uint8_t *second_reg8bits = get_opcode_register(cpu, SECOND_REGISTER_IDX(cpu->opcode));
+  uint8_t *main_reg8bits = get_opcode_register_8bits(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  uint8_t *second_reg8bits = get_opcode_register_8bits(cpu, SECOND_REGISTER_IDX(cpu->opcode));
   *main_reg8bits = *second_reg8bits;
   return 1;
 }
 
 uint8_t LD_r_n(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t *reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  uint8_t *reg8bits = get_opcode_register_8bits(cpu, MAIN_REGISTER_IDX(cpu->opcode));
   *reg8bits = read_bus(busAddr, cpu->PC.value++);
   return 2;
 }
 
 uint8_t LD_r_HL(sm83_t *cpu, bus_t *busAddr) {
   uint8_t value = read_bus(busAddr, cpu->HL.value);
-  uint8_t *reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  uint8_t *reg8bits = get_opcode_register_8bits(cpu, MAIN_REGISTER_IDX(cpu->opcode));
   *reg8bits = value;
   return 2;
 }
@@ -314,7 +324,7 @@ uint8_t LD_HL_n(sm83_t *cpu, bus_t *busAddr) {
 }
 
 uint8_t LD_HL_r(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t *reg8bits = get_opcode_register(cpu, SECOND_REGISTER_IDX(cpu->opcode));
+  uint8_t *reg8bits = get_opcode_register_8bits(cpu, SECOND_REGISTER_IDX(cpu->opcode));
   write_bus(busAddr, cpu->HL.value, *reg8bits);
   return 2;
 }
@@ -366,17 +376,17 @@ uint8_t INC_rr(sm83_t *cpu, bus_t *busAddr) {
 }
 
 uint8_t XOR_r(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t *reg8bits = get_opcode_register(cpu, SECOND_REGISTER_IDX(cpu->opcode));
+  uint8_t *reg8bits = get_opcode_register_8bits(cpu, SECOND_REGISTER_IDX(cpu->opcode));
 
   alu_result_t alu_result = alu_xor(cpu->AF.msb, *reg8bits);
   cpu->AF.msb = alu_result.result;
   uint8_t z_flag = alu_result.result == 0 ? 1 : 0;
   cpu->AF.lsb = JOIN_FLAGS(z_flag, 0, 0, 0);
-  return 0;
+  return 1;
 }
 
 uint8_t DEC_r(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t *reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  uint8_t *reg8bits = get_opcode_register_8bits(cpu, MAIN_REGISTER_IDX(cpu->opcode));
   alu_result_t alu_result = alu_sub(*reg8bits, 1);
   *reg8bits = alu_result.result;
   uint8_t z_flag = (alu_result.result == 0) ? 1 : 0;
@@ -388,7 +398,7 @@ uint8_t DEC_r(sm83_t *cpu, bus_t *busAddr) {
 }
 
 uint8_t INC_r(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t *reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  uint8_t *reg8bits = get_opcode_register_8bits(cpu, MAIN_REGISTER_IDX(cpu->opcode));
   alu_result_t result = alu_add(*reg8bits, 1);
   *reg8bits = result.result;
   uint8_t z_flag = (result.result == 0) ? 1 : 0;
@@ -400,7 +410,7 @@ uint8_t INC_r(sm83_t *cpu, bus_t *busAddr) {
 }
 
 uint8_t ADD_r(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t *reg8bits = get_opcode_register(cpu, SECOND_REGISTER_IDX(cpu->opcode));
+  uint8_t *reg8bits = get_opcode_register_8bits(cpu, SECOND_REGISTER_IDX(cpu->opcode));
   alu_result_t data = alu_add(cpu->AF.msb, *reg8bits);
   cpu->AF.msb = data.result;
   uint8_t z_flag = (data.result == 0) ? 1 : 0;
