@@ -246,15 +246,10 @@ uint8_t XXX(sm83_t *cpu, bus_t *busAddr) {
 
 // LOADERS
 uint8_t LD_rr_nn(sm83_t *cpu, bus_t *busAddr) {
-  reg16_t *regs[4] = {&cpu->BC, &cpu->DE, &cpu->HL, &cpu->SP};
-  uint8_t reg_index = (cpu->opcode & MASK_MSB_8BITS) >> 4;
-  if (reg_index < 4) {
-    reg16_t *reg = regs[reg_index];
-    reg->lsb = read_bus(busAddr, cpu->PC.value++);
-    reg->msb = read_bus(busAddr, cpu->PC.value++);
-    return 3;
-  }
-  return 0;
+  reg16_t *reg = get_opcode_register_16bits(cpu, PAIR_REGISTER_IDX(cpu->opcode));
+  reg->lsb = read_bus(busAddr, cpu->PC.value++);
+  reg->msb = read_bus(busAddr, cpu->PC.value++);
+  return 3;
 }
 
 uint8_t LD_rr_A(sm83_t *cpu, bus_t *busAddr) {
@@ -356,22 +351,8 @@ uint8_t LDH_A_n(sm83_t *cpu, bus_t *busAddr) {
 }
 
 uint8_t INC_rr(sm83_t *cpu, bus_t *busAddr) {
-  switch (cpu->opcode) {
-    case 0x03:
-      cpu->BC.value++;
-    break;
-    case 0x13:
-      cpu->DE.value++;
-    break;
-    case 0x23:
-      cpu->HL.value++;
-    break;
-    case 0x33:
-      cpu->SP.value++;
-    break;
-    default:
-      return 0;
-  }
+  reg16_t* reg16 = get_opcode_register_16bits(cpu, PAIR_REGISTER_IDX(cpu->opcode));
+  reg16->value++;
   return 2;
 }
 

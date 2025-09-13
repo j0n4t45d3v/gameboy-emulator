@@ -11,6 +11,7 @@
 #define XOR(r1, r2) r1 ^ r2
 #define MAIN_REGISTER_IDX(opcode) ((opcode & 0b00111000) >> 3)
 #define SECOND_REGISTER_IDX(opcode) ((opcode & 0b00000111))
+#define PAIR_REGISTER_IDX(opcode) ((opcode & 0b00110000) >> 4)
 #define HAS_HALF_CARRY_IN_SUB(r1, value) (r1 & MASK_LSB_8BITS) < value
 #define HAS_HALF_CARRY_IN_ADD(r1, r2) ((r1 & MASK_LSB_8BITS) + (r2 & MASK_LSB_8BITS)) > 0x0F
 
