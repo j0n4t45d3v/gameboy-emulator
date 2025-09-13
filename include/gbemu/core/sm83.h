@@ -1,5 +1,4 @@
-#ifndef SM83_H
-#define SM83_H
+#pragma once
 
 #include "gbemu/common/types.h"
 #include "gbemu/core/bus.h"
@@ -122,5 +121,3 @@ uint8_t DI(sm83_t*, bus_t*);
 //ROTATES, SHIFTS, AND BIT OPERATIONS
 uint8_t RLCA(sm83_t*, bus_t*);
 uint8_t RRCA(sm83_t*, bus_t*);
-
-#endif // !SM83_H

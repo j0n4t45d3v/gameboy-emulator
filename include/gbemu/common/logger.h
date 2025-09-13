@@ -1,5 +1,4 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#pragma once
 
 #include "gbemu/common/types.h"
 #include <stdlib.h>
@@ -37,4 +36,3 @@ static string_t bitsToString(uint8_t byte) {
     buffer[8] = '\0';  // null terminator
   return buffer;
 }
-#endif // LOGGER_H

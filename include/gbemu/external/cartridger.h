@@ -1,5 +1,4 @@
-#ifndef CARTRIDGER_H
-#define CARTRIDGER_H
+#pragma once
 
 #include "../common/types.h"
 #include "../common/units.h"
@@ -25,5 +24,3 @@ void load_rom(cartridger_t*, string_t);
 uint8_t checksum(const char *);
 
 extern const string_t CART_TYPE_DECODER[CART_TYPE_DECODER_SIZE];
-
-#endif // !CARTRIDGER_H
