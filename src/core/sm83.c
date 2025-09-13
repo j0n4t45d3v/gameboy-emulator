@@ -1,5 +1,6 @@
 #include "gbemu/core/sm83.h"
 #include "gbemu/common/bitwise.h"
+#include "gbemu/common/logger.h"
 #include "gbemu/core/bus.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -185,11 +186,19 @@ void clock(sm83_t *cpu, bus_t *busAddr) {
 
 uint8_t fetch(sm83_t *cpu, bus_t *busAddr) {
   cpu->opcode = read_bus(busAddr, cpu->PC.value++);
+  LOG_INFO("CURRENT OPCODE: 0X%02X", cpu->opcode);
   return 1;
 }
 
 uint8_t execute(sm83_t *cpu, bus_t *busAddr) {
-  return DECODER[cpu->opcode](cpu, busAddr);
+  instruction_t instruction = DECODER[cpu->opcode];
+  if(instruction.fn == NULL) {
+    LOG_WARN("OPCODE UNIMPLEMENTED");
+    return 0;
+  }
+
+  LOG_INFO("EXECUTE INSTRUCTION: %s", instruction.name);
+  return instruction.fn(cpu, busAddr);
 }
 
 /*
