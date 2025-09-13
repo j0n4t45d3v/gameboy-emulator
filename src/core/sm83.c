@@ -179,10 +179,8 @@ sm83_t *init() {
 }
 
 void clock(sm83_t *cpu, bus_t *busAddr) {
-  do {
-    fetch(cpu, busAddr);
-    cpu->clocks += execute(cpu, busAddr);
-  } while (cpu->clocks > 0);
+  fetch(cpu, busAddr);
+  cpu->clocks = execute(cpu, busAddr);
 }
 
 uint8_t fetch(sm83_t *cpu, bus_t *busAddr) {
