@@ -187,6 +187,40 @@ TEST(INC_rr, "Should Increment rr Register 16 bits", {
   ASSERT_EQ_HEX(0x0000, cpu->SP.value);
 })
 
+TEST(XOR_r, "Should perform XOR operatio between A register and the 8-bit register 'r'", {
+  cpu->opcode = 0xA8;
+  cpu->AF.msb = 0b10110010;
+  cpu->BC.msb = 0b00100001;
+  cpu->DE.msb = 0x00;
+  cpu->HL.msb = 0x00;
+
+  uint8_t clocks = XOR_r(cpu, bus);
+
+  ASSERT_EQ_NUM(1, clocks);
+  ASSERT_EQ_BINARY(0b10010011, cpu->AF.msb);
+  ASSERT_EQ_BINARY(0b00100001, cpu->BC.msb);
+  ASSERT_EQ_NUM(0, Z_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, H_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, H_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, C_FLAG_VALUE(cpu->AF.lsb));
+
+  cpu->opcode = 0xAF;
+  cpu->AF.msb = 0b10110010;
+  cpu->BC.msb = 0b00100001;
+  cpu->DE.msb = 0b00100001;
+  cpu->HL.msb = 0b00100001;
+
+  clocks = XOR_r(cpu, bus);
+
+  ASSERT_EQ_NUM(1, clocks);
+  ASSERT_EQ_HEX(0x00, cpu->AF.msb);
+  ASSERT_EQ_BINARY(0b00100001, cpu->BC.msb);
+  ASSERT_EQ_NUM(1, Z_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, N_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, H_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, C_FLAG_VALUE(cpu->AF.lsb));
+})
+
 TEST(DEC_r, "Should Decrement r Register 8 bits", {
   cpu->opcode = 0x05;
   cpu->BC.value = 0x0F00;
@@ -220,6 +254,70 @@ TEST(DEC_r, "Should Decrement r Register 8 bits", {
   ASSERT_EQ_HEX(0x00, cpu->BC.lsb);
 })
 
+TEST(INC_r, "Should increment the 8-bits resgiter 'r' value", {
+  cpu->opcode = 0x04;
+  cpu->BC.msb = 0x00;
+
+  uint8_t clocks = INC_r(cpu, bus);
+  
+  ASSERT_EQ_NUM(1, clocks);
+  ASSERT_EQ_NUM(1, cpu->BC.msb)
+  ASSERT_EQ_NUM(0, Z_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, H_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, H_FLAG_VALUE(cpu->AF.lsb));
+
+  cpu->opcode = 0x14;
+  cpu->DE.msb = 0b00001111;
+
+  clocks = INC_r(cpu, bus);
+  
+  ASSERT_EQ_NUM(1, clocks);
+  ASSERT_EQ_NUM(0x10, cpu->DE.msb)
+  ASSERT_EQ_NUM(0, Z_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, N_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(1, H_FLAG_VALUE(cpu->AF.lsb));
+
+  cpu->opcode = 0x24;
+  cpu->HL.msb = 0b11111111;
+
+  clocks = INC_r(cpu, bus);
+  
+  ASSERT_EQ_NUM(1, clocks);
+  ASSERT_EQ_NUM(0, cpu->HL.msb)
+  ASSERT_EQ_NUM(1, Z_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, N_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(1, H_FLAG_VALUE(cpu->AF.lsb));
+})
+
+TEST(ADD_r, "Should add to the A register the 8-bits register value", {
+  
+  cpu->opcode = 0x80;
+  cpu->AF.msb = 0x0F;
+  cpu->BC.msb = 0x01;
+
+  uint8_t clocks = ADD_r(cpu, bus);
+  
+  ASSERT_EQ_NUM(1, clocks);
+  ASSERT_EQ_HEX(0x10, cpu->AF.msb)
+  ASSERT_EQ_NUM(0, Z_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, N_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(1, H_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, C_FLAG_VALUE(cpu->AF.lsb));
+
+  cpu->opcode = 0x80;
+  cpu->AF.msb = 0xFF;
+  cpu->BC.msb = 0x01;
+
+  clocks = ADD_r(cpu, bus);
+  
+  ASSERT_EQ_NUM(1, clocks);
+  ASSERT_EQ_HEX(0, cpu->AF.msb)
+  ASSERT_EQ_NUM(1, Z_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(0, N_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(1, H_FLAG_VALUE(cpu->AF.lsb));
+  ASSERT_EQ_NUM(1, C_FLAG_VALUE(cpu->AF.lsb));
+})
+
 TEST(JP_nn, "Should jump to nn address", {
   cpu->opcode = 0xC3;
   cpu->PC.value = 0x0000;
@@ -247,7 +345,10 @@ RUN_SUITE(instructions,
   test_LDH_n_A,
   test_LDH_A_n,
   test_INC_rr,
+  test_XOR_r,
   test_DEC_r,
+  test_INC_r,
+  test_ADD_r,
   test_JP_nn,
 );
 
