@@ -169,12 +169,12 @@ sm83_t *init() {
   cpu->IE.value = 0x0000;
   cpu->IR.value = 0x0000;
 
-  cpu->AF.value = 0x0000;
+  cpu->AF.value = 0x01B0;
   cpu->BC.value = 0x0000;
   cpu->DE.value = 0x0000;
   cpu->HL.value = 0x0000;
-  cpu->PC.value = 0x0000;
-  cpu->SP.value = 0x0000;
+  cpu->PC.value = 0x0100;
+  cpu->SP.value = 0xFFFE;
   return cpu;
 }
 
