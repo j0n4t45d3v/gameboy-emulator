@@ -220,6 +220,19 @@ TEST(DEC_r, "Should Decrement r Register 8 bits", {
   ASSERT_EQ_HEX(0x00, cpu->BC.lsb);
 })
 
+TEST(JP_nn, "Should jump to nn address", {
+  cpu->opcode = 0xC3;
+  cpu->PC.value = 0x0000;
+  write_bus(bus, 0x0000, 0x00);
+  write_bus(bus, 0x0001, 0x01);
+
+  uint8_t clocks = JP_nn(cpu, bus);
+  ASSERT_EQ_NUM(4, clocks);
+  ASSERT_EQ_HEX(0x01, cpu->PC.msb);
+  ASSERT_EQ_HEX(0x00, cpu->PC.lsb);
+  ASSERT_EQ_HEX(0x0100, cpu->PC.value);
+})
+
 RUN_SUITE(instructions,  
   test_LD_r_r,
   test_LD_r_n,
@@ -234,6 +247,7 @@ RUN_SUITE(instructions,
   test_LDH_n_A,
   test_LDH_A_n,
   test_INC_rr,
-  test_DEC_r
+  test_DEC_r,
+  test_JP_nn,
 );
 
