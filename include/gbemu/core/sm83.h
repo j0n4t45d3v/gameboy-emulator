@@ -30,7 +30,7 @@
 #define SET_C_FLAG(flags) (flags << 4)
 
 #define JOIN_FLAGS(z_flag, n_flag, h_flag, c_flag)\
-SET_Z_FLAG(z_flag), SET_N_FLAG(n_flag), SET_H_FLAG(h_flag), SET_C_FLAG(c_flag)
+SET_Z_FLAG(z_flag) | SET_N_FLAG(n_flag) | SET_H_FLAG(h_flag) | SET_C_FLAG(c_flag)
 
 #define INSTRUCTION(instruction) {instruction, #instruction}
 
