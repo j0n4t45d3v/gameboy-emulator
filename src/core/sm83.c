@@ -1,7 +1,10 @@
 #include "gbemu/core/sm83.h"
+#include "SDL_cpuinfo.h"
 #include "gbemu/common/bitwise.h"
 #include "gbemu/common/logger.h"
+#include "gbemu/core/alu.h"
 #include "gbemu/core/bus.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -165,9 +168,21 @@ const instruction_t DECODER[NUMBER_OF_THE_INSTRUCTIONS] = {
     [0x07] = INSTRUCTION(RLCA),
 };
 
+static uint8_t* get_opcode_register(sm83_t *cpu, uint8_t index) {
+  uint8_t *registers[8] = {
+    [0x0] = &cpu->BC.msb,
+    [0x1] = &cpu->BC.lsb,
+    [0x2] = &cpu->DE.msb,
+    [0x3] = &cpu->DE.lsb,
+    [0x4] = &cpu->HL.msb,
+    [0x5] = &cpu->HL.lsb,
+    [0x7] = &cpu->AF.msb,
+  };
+  return registers[index];
+}
+
 sm83_t *init() {
   sm83_t *cpu = malloc(sizeof(sm83_t));
-  cpu->IE.value = 0x0000;
   cpu->IR.value = 0x0000;
 
   cpu->AF.value = 0x01B0;
@@ -227,8 +242,9 @@ uint8_t LD_rr_nn(sm83_t *cpu, bus_t *busAddr) {
     reg16_t *reg = regs[reg_index];
     reg->lsb = read_bus(busAddr, cpu->PC.value++);
     reg->msb = read_bus(busAddr, cpu->PC.value++);
+    return 3;
   }
-  return 3;
+  return 0;
 }
 
 uint8_t LD_rr_A(sm83_t *cpu, bus_t *busAddr) {
@@ -245,6 +261,8 @@ uint8_t LD_rr_A(sm83_t *cpu, bus_t *busAddr) {
   case 0x32:
     write_bus(busAddr, cpu->HL.value--, cpu->AF.msb);
     break;
+  default: 
+      return 0;
   }
   return 2;
 }
@@ -263,252 +281,41 @@ uint8_t LD_A_rr(sm83_t *cpu, bus_t *busAddr) {
   case 0x3A:
     cpu->AF.msb = read_bus(busAddr, cpu->HL.value--);
     break;
+  default: 
+      return 0;
   }
   return 2;
 }
 
 uint8_t LD_r_r(sm83_t *cpu, bus_t *busAddr) {
-  switch (cpu->opcode) {
-  case 0x40:
-    cpu->BC.msb = cpu->BC.msb;
-    break;
-  case 0x50:
-    cpu->DE.msb = cpu->BC.msb;
-    break;
-  case 0x60:
-    cpu->HL.msb = cpu->BC.msb;
-    break;
-  case 0x41:
-    cpu->BC.msb = cpu->BC.lsb;
-    break;
-  case 0x51:
-    cpu->DE.msb = cpu->BC.lsb;
-    break;
-  case 0x61:
-    cpu->HL.msb = cpu->BC.lsb;
-    break;
-
-  case 0x42:
-    cpu->BC.msb = cpu->DE.msb;
-    break;
-  case 0x52:
-    cpu->DE.msb = cpu->DE.msb;
-    break;
-  case 0x62:
-    cpu->HL.msb = cpu->DE.msb;
-    break;
-  case 0x43:
-    cpu->BC.msb = cpu->DE.lsb;
-    break;
-  case 0x53:
-    cpu->DE.msb = cpu->DE.lsb;
-    break;
-  case 0x63:
-    cpu->HL.msb = cpu->DE.lsb;
-    break;
-
-  case 0x44:
-    cpu->BC.msb = cpu->HL.msb;
-    break;
-  case 0x54:
-    cpu->DE.msb = cpu->HL.msb;
-    break;
-  case 0x64:
-    cpu->HL.msb = cpu->HL.msb;
-    break;
-  case 0x45:
-    cpu->BC.msb = cpu->HL.lsb;
-    break;
-  case 0x55:
-    cpu->DE.msb = cpu->HL.lsb;
-    break;
-  case 0x65:
-    cpu->HL.msb = cpu->HL.lsb;
-
-  case 0x47:
-    cpu->BC.msb = cpu->AF.msb;
-    break;
-  case 0x57:
-    cpu->DE.msb = cpu->AF.msb;
-    break;
-  case 0x67:
-    cpu->HL.msb = cpu->AF.msb;
-    break;
-
-  case 0x48:
-    cpu->BC.lsb = cpu->BC.msb;
-    break;
-  case 0x58:
-    cpu->DE.lsb = cpu->BC.msb;
-    break;
-  case 0x68:
-    cpu->HL.lsb = cpu->BC.msb;
-    break;
-  case 0x78:
-    cpu->AF.msb = cpu->BC.msb;
-    break;
-
-  case 0x49:
-    cpu->BC.lsb = cpu->BC.lsb;
-    break;
-  case 0x59:
-    cpu->DE.lsb = cpu->BC.lsb;
-    break;
-  case 0x69:
-    cpu->HL.lsb = cpu->BC.lsb;
-    break;
-  case 0x79:
-    cpu->AF.msb = cpu->BC.lsb;
-    break;
-
-  case 0x4A:
-    cpu->BC.lsb = cpu->DE.msb;
-    break;
-  case 0x5A:
-    cpu->DE.lsb = cpu->DE.msb;
-    break;
-  case 0x6A:
-    cpu->HL.lsb = cpu->DE.msb;
-    break;
-  case 0x7A:
-    cpu->AF.msb = cpu->DE.msb;
-    break;
-
-  case 0x4B:
-    cpu->BC.lsb = cpu->DE.lsb;
-    break;
-  case 0x5B:
-    cpu->DE.lsb = cpu->DE.lsb;
-    break;
-  case 0x6B:
-    cpu->HL.lsb = cpu->DE.lsb;
-    break;
-  case 0x7B:
-    cpu->AF.msb = cpu->DE.lsb;
-    break;
-
-  case 0x4C:
-    cpu->BC.lsb = cpu->HL.msb;
-    break;
-  case 0x5C:
-    cpu->DE.lsb = cpu->HL.msb;
-    break;
-  case 0x6C:
-    cpu->HL.lsb = cpu->HL.msb;
-    break;
-  case 0x7C:
-    cpu->AF.msb = cpu->HL.msb;
-    break;
-
-  case 0x4D:
-    cpu->BC.lsb = cpu->HL.lsb;
-    break;
-  case 0x5D:
-    cpu->DE.lsb = cpu->HL.lsb;
-    break;
-  case 0x6D:
-    cpu->HL.lsb = cpu->HL.lsb;
-    break;
-  case 0x7D:
-    cpu->AF.msb = cpu->HL.lsb;
-    break;
-
-  case 0x4F:
-    cpu->BC.lsb = cpu->AF.msb;
-    break;
-  case 0x5F:
-    cpu->DE.lsb = cpu->AF.msb;
-    break;
-  case 0x6F:
-    cpu->HL.lsb = cpu->AF.msb;
-    break;
-  case 0x7F:
-    cpu->AF.msb = cpu->AF.msb;
-    break;
-  }
+  uint8_t *main_reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  uint8_t *second_reg8bits = get_opcode_register(cpu, SECOND_REGISTER_IDX(cpu->opcode));
+  *main_reg8bits = *second_reg8bits;
   return 1;
 }
 
 uint8_t LD_r_n(sm83_t *cpu, bus_t *busAddr) {
-  switch (cpu->opcode) {
-  case 0x06:
-    cpu->BC.msb = read_bus(busAddr, cpu->PC.value++);
-    break;
-  case 0x16:
-    cpu->DE.msb = read_bus(busAddr, cpu->PC.value++);
-    break;
-  case 0x26:
-    cpu->HL.msb = read_bus(busAddr, cpu->PC.value++);
-    break;
-
-  case 0x0E:
-    cpu->BC.lsb = read_bus(busAddr, cpu->PC.value++);
-    break;
-  case 0x1E:
-    cpu->DE.lsb = read_bus(busAddr, cpu->PC.value++);
-    break;
-  case 0x2E:
-    cpu->HL.lsb = read_bus(busAddr, cpu->PC.value++);
-    break;
-  case 0x3E:
-    cpu->AF.msb = read_bus(busAddr, cpu->PC.value++);
-    break;
-  }
+  uint8_t *reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  *reg8bits = read_bus(busAddr, cpu->PC.value++);
   return 2;
 }
 
 uint8_t LD_r_HL(sm83_t *cpu, bus_t *busAddr) {
   uint8_t value = read_bus(busAddr, cpu->HL.value);
-  switch (cpu->opcode) {
-  case 0x46:
-    cpu->BC.msb = value;
-    break;
-  case 0x56:
-    cpu->DE.msb = value;
-    break;
-  case 0x66:
-    cpu->HL.msb = value;
-
-  case 0x4E:
-    cpu->BC.lsb = value;
-    break;
-  case 0x5E:
-    cpu->DE.lsb = value;
-    break;
-  case 0x6E:
-    cpu->HL.lsb = value;
-    break;
-  case 0x7E:
-    cpu->AF.msb = value;
-    break;
-  }
+  uint8_t *reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  *reg8bits = value;
   return 2;
 }
 
 uint8_t LD_HL_n(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t value = read_bus(busAddr, cpu->PC.value);
+  uint8_t value = read_bus(busAddr, cpu->PC.value++);
   write_bus(busAddr, cpu->HL.value, value);
   return 3;
 }
 
-#define NUM_ACTIONS 8
-#define MASK_LSB_8BIT 0x0F
-
 uint8_t LD_HL_r(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t data[NUM_ACTIONS] = {
-    [0x00] = cpu->BC.msb,
-    [0x01] = cpu->BC.lsb,
-    [0x02] = cpu->DE.msb,
-    [0x03] = cpu->DE.lsb,
-    [0x04] = cpu->HL.msb,
-    [0x05] = cpu->HL.lsb,
-    [0x07] = cpu->AF.msb
-  };
-
-  uint8_t index = cpu->opcode & MASK_LSB_8BIT;
-  if(index >= 0 && index < NUM_ACTIONS && index != 0x06) {
-    write_bus(busAddr, cpu->HL.value, data[index]);
-  }
+  uint8_t *reg8bits = get_opcode_register(cpu, SECOND_REGISTER_IDX(cpu->opcode));
+  write_bus(busAddr, cpu->HL.value, *reg8bits);
   return 2;
 }
 
@@ -533,7 +340,271 @@ uint8_t LDH_n_A(sm83_t *cpu, bus_t *busAddr) {
 }
 
 uint8_t LDH_A_n(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t lsb_n = read_bus(busAddr, cpu->PC.value);
+  uint8_t lsb_n = read_bus(busAddr, cpu->PC.value++);
   cpu->AF.msb = read_bus(busAddr, UNSIGNED_16(0xFF, lsb_n));
   return 3;
+}
+
+uint8_t INC_rr(sm83_t *cpu, bus_t *busAddr) {
+  switch (cpu->opcode) {
+    case 0x03:
+      cpu->BC.value++;
+    break;
+    case 0x13:
+      cpu->DE.value++;
+    break;
+    case 0x23:
+      cpu->HL.value++;
+    break;
+    case 0x33:
+      cpu->SP.value++;
+    break;
+    default:
+      return 0;
+  }
+  return 2;
+}
+
+uint8_t XOR_r(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t r;
+
+  switch (cpu->opcode) {
+    case 0xA8:
+      r = cpu->BC.msb;
+    break;
+    case 0xA9:
+      r = cpu->BC.lsb;
+    break;
+    case 0xAA:
+      r = cpu->DE.msb;
+    break;
+    case 0xAB:
+      r = cpu->DE.lsb;
+    break;
+    case 0xAC:
+      r = cpu->HL.msb;
+    break;
+    case 0xAD:
+      r = cpu->HL.lsb;
+    break;
+    case 0xAF:
+      r = cpu->AF.msb;
+    break;
+    default: 
+      return 0;
+  }
+
+  uint8_t result = XOR(cpu->AF.msb, r);
+  cpu->AF.msb = result;
+  cpu->AF.lsb = (result == 0) ? 0b10000000 : 0b00000000;
+  return 1;
+}
+
+uint8_t DEC_r(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t result = 0;
+  bool half_carry = false;
+
+  switch (cpu->opcode) {
+    case 0x05:
+      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->BC.msb, 1);
+      cpu->BC.msb--;
+      result = cpu->BC.msb;
+    break;
+    case 0x15:
+      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->DE.msb, 1);
+      cpu->DE.msb--;
+      result = cpu->DE.msb;
+    break;
+    case 0x25:
+      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->HL.msb, 1);
+      cpu->HL.msb--;
+      result = cpu->HL.msb;
+    break;
+    case 0x0D:
+      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->BC.lsb, 1);
+      cpu->BC.lsb--;
+      result = cpu->BC.lsb;
+    break;
+    case 0x1D:
+      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->DE.lsb, 1);
+      cpu->DE.lsb--;
+      result = cpu->DE.lsb;
+    break;
+    case 0x2D:
+      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->HL.lsb, 1);
+      cpu->HL.lsb--;
+      result = cpu->HL.lsb;
+    break;
+    case 0x3D:
+      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->AF.msb, 1);
+      cpu->AF.msb--;
+      result = cpu->AF.msb;
+    break;
+    default: 
+      return 0;
+  }
+
+  uint8_t z_flag = (result == 0) ? 0b1000 : 0b0000;
+  uint8_t n_flag = 0b0100;
+  uint8_t h_flag = (half_carry) ? 0b0010 : 0b0000;
+  uint8_t c_flag = C_FLAG(cpu->AF.lsb);
+  cpu->AF.lsb = (z_flag | n_flag | h_flag | c_flag) << 4;
+  return 1;
+}
+
+uint8_t INC_r(sm83_t *cpu, bus_t *busAddr) {
+  alu_result_t result;
+  switch(cpu->opcode) {
+    case 0x04:
+      result = alu_add(cpu->BC.msb, 1);
+      cpu->BC.msb = result.result;
+    break;
+    case 0x14:
+      result = alu_add(cpu->DE.msb, 1);
+      cpu->DE.msb = result.result;
+    break;
+    case 0x24:
+      result = alu_add(cpu->HL.msb, 1);
+      cpu->HL.msb = result.result;
+    break;
+    case 0x0C:
+      result = alu_add(cpu->BC.lsb, 1);
+      cpu->BC.lsb = result.result;
+    break;
+    case 0x1C:
+      result = alu_add(cpu->DE.lsb, 1);
+      cpu->DE.lsb = result.result;
+    break;
+    case 0x2C:
+      result = alu_add(cpu->HL.lsb, 1);
+      cpu->HL.lsb = result.result;
+    break;
+    case 0x3C:
+      result = alu_add(cpu->AF.msb, 1);
+      cpu->AF.msb = result.result;
+    break;
+    default:
+      return 0;
+  }
+  uint8_t z_flag = (result.result == 0) ? 1 : 0;
+  uint8_t n_flag =  0;
+  uint8_t h_flag = (result.has_half_carry) ? 1 : 0;
+  uint8_t c_flag = C_FLAG_VALUE(cpu->AF.lsb);
+  cpu->AF.lsb = JOIN_FLAGS(z_flag, n_flag, h_flag, c_flag);
+  return 1;
+}
+
+uint8_t ADD_r(sm83_t *cpu, bus_t *busAddr) {
+  if(cpu->opcode == 0x80) {
+    alu_result_t data = alu_add(cpu->AF.msb, cpu->BC.msb);
+    cpu->AF.msb = data.result;
+    uint8_t z_flag = (data.result == 0) ? 1 : 0;
+    uint8_t n_flag =  0;
+    uint8_t h_flag = (data.has_half_carry) ? 1 : 0;
+    uint8_t c_flag = (data.has_carry) ? 1 : 0;
+    cpu->AF.lsb = JOIN_FLAGS(z_flag, n_flag, h_flag, c_flag);
+    return 1;
+  }
+  return 0;
+}
+
+//FLOW CONTROLL
+uint8_t JP_nn(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t nn_lsb = read_bus(busAddr, cpu->PC.value++);
+  uint8_t nn_msb = read_bus(busAddr, cpu->PC.value++);
+  cpu->PC.value = UNSIGNED_16(nn_msb, nn_lsb);
+  return 4;
+}
+
+uint8_t JP_cc_e(sm83_t *cpu, bus_t *busAddr) {
+  int8_t signed_value = (int8_t)read_bus(busAddr, cpu->PC.value++);
+
+  bool condition = false;
+  if (cpu->opcode == 0x20) {
+    condition = !Z_FLAG_VALUE(cpu->AF.value);
+  }else if (cpu->opcode == 0x30) {
+    condition = !C_FLAG_VALUE(cpu->AF.value);
+  }else if (cpu->opcode == 0x28) {
+    condition = Z_FLAG_VALUE(cpu->AF.value);
+  }else if (cpu->opcode == 0x38) {
+    condition = C_FLAG_VALUE(cpu->AF.value);
+  }
+
+  if(condition) {
+    cpu->PC.value += signed_value;
+    return 3;
+  }
+  return 2;
+}
+
+
+uint8_t RST_n(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t n_value = cpu->opcode & 0b00111000;
+  write_bus(busAddr, --cpu->SP.value, cpu->PC.msb);
+  write_bus(busAddr, --cpu->SP.value, cpu->PC.lsb);
+  cpu->PC.value = UNSIGNED_16(0x00, n_value);
+  return 4;
+}
+
+uint8_t RET(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t lsb = read_bus(busAddr, cpu->SP.value++);
+  uint8_t msb = read_bus(busAddr, cpu->SP.value++);
+  cpu->PC.value = UNSIGNED_16(msb, lsb);
+  return 4;
+}
+
+uint8_t CALL_nn(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t nn_lsb = read_bus(busAddr, cpu->PC.value++);
+  uint8_t nn_msb = read_bus(busAddr, cpu->PC.value++);
+  uint8_t nn_value = UNSIGNED_16(nn_msb, nn_lsb);
+  write_bus(busAddr, --cpu->SP.value, cpu->PC.msb);
+  write_bus(busAddr, --cpu->SP.value, cpu->PC.lsb);
+  cpu->PC.value = nn_value;
+  return 6;
+}
+
+uint8_t CALL_cc_nn(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t nn_lsb = read_bus(busAddr, cpu->PC.value++);
+  uint8_t nn_msb = read_bus(busAddr, cpu->PC.value++);
+  uint8_t nn_value = UNSIGNED_16(nn_msb, nn_lsb);
+  bool condition = false;
+  if (cpu->opcode == 0xCC) {
+    condition = Z_FLAG_VALUE(cpu->AF.value);
+  } else if(cpu->opcode == 0xDC) {
+    condition = C_FLAG_VALUE(cpu->AF.value);
+  } else if (cpu->opcode == 0xC4) {
+    condition = !Z_FLAG_VALUE(cpu->AF.value);
+  } else if(cpu->opcode == 0xD4) {
+    condition = !C_FLAG_VALUE(cpu->AF.value);
+  }
+
+  if (condition) {
+    write_bus(busAddr, --cpu->SP.value, cpu->PC.msb);
+    write_bus(busAddr, --cpu->SP.value, cpu->PC.lsb);
+    cpu->PC.value = nn_value;
+    return 6;
+  }
+  return 3;
+}
+
+//ROTATES, SHIFTS, AND BIT OPERATIONS
+uint8_t RLCA(sm83_t *cpu, bus_t *busAddr) {
+  alu_result_t result = alu_rotate_left_circular(cpu->AF.msb);
+  cpu->AF.msb = result.result;
+  cpu->AF.lsb = result.has_carry ? 0x10 : 0x00;
+  return 1;
+}
+
+uint8_t RRCA(sm83_t *cpu, bus_t *busAddr) {
+  uint8_t reg_a_value = cpu->AF.msb;
+  uint8_t b0 = (0b00000001 & reg_a_value);
+  uint8_t rest = (0b11111110 & reg_a_value) >> 1;
+  cpu->AF.msb = (b0 << 7) | rest;
+  cpu->AF.lsb = (b0 == 0) ? 0x00 : 0x10;
+  return 1;
+}
+
+uint8_t DI(sm83_t *cpu, bus_t *busAddr) {
+  cpu->IME = false;
+  return 1;
 }
