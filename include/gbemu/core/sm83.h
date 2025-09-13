@@ -1,7 +1,9 @@
 #ifndef SM83_H
 #define SM83_H
 
+#include "gbemu/common/types.h"
 #include "gbemu/core/bus.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 #define MASK_MSB_8BITS 0xF0
@@ -46,7 +48,7 @@ typedef union {
 // CPU 
 typedef struct sm83 {
   reg16_t IR;
-  reg16_t IE;
+  bool IME;
 
   reg16_t AF;
   reg16_t BC;
