@@ -366,126 +366,31 @@ uint8_t INC_rr(sm83_t *cpu, bus_t *busAddr) {
 }
 
 uint8_t XOR_r(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t r;
+  uint8_t *reg8bits = get_opcode_register(cpu, SECOND_REGISTER_IDX(cpu->opcode));
 
-  switch (cpu->opcode) {
-    case 0xA8:
-      r = cpu->BC.msb;
-    break;
-    case 0xA9:
-      r = cpu->BC.lsb;
-    break;
-    case 0xAA:
-      r = cpu->DE.msb;
-    break;
-    case 0xAB:
-      r = cpu->DE.lsb;
-    break;
-    case 0xAC:
-      r = cpu->HL.msb;
-    break;
-    case 0xAD:
-      r = cpu->HL.lsb;
-    break;
-    case 0xAF:
-      r = cpu->AF.msb;
-    break;
-    default: 
-      return 0;
-  }
-
-  uint8_t result = XOR(cpu->AF.msb, r);
-  cpu->AF.msb = result;
-  cpu->AF.lsb = (result == 0) ? 0b10000000 : 0b00000000;
-  return 1;
+  alu_result_t alu_result = alu_xor(cpu->AF.msb, *reg8bits);
+  cpu->AF.msb = alu_result.result;
+  uint8_t z_flag = alu_result.result == 0 ? 1 : 0;
+  cpu->AF.lsb = JOIN_FLAGS(z_flag, 0, 0, 0);
+  return 0;
 }
 
 uint8_t DEC_r(sm83_t *cpu, bus_t *busAddr) {
-  uint8_t result = 0;
-  bool half_carry = false;
-
-  switch (cpu->opcode) {
-    case 0x05:
-      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->BC.msb, 1);
-      cpu->BC.msb--;
-      result = cpu->BC.msb;
-    break;
-    case 0x15:
-      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->DE.msb, 1);
-      cpu->DE.msb--;
-      result = cpu->DE.msb;
-    break;
-    case 0x25:
-      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->HL.msb, 1);
-      cpu->HL.msb--;
-      result = cpu->HL.msb;
-    break;
-    case 0x0D:
-      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->BC.lsb, 1);
-      cpu->BC.lsb--;
-      result = cpu->BC.lsb;
-    break;
-    case 0x1D:
-      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->DE.lsb, 1);
-      cpu->DE.lsb--;
-      result = cpu->DE.lsb;
-    break;
-    case 0x2D:
-      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->HL.lsb, 1);
-      cpu->HL.lsb--;
-      result = cpu->HL.lsb;
-    break;
-    case 0x3D:
-      half_carry = HAS_HALF_CARRY_IN_SUB(cpu->AF.msb, 1);
-      cpu->AF.msb--;
-      result = cpu->AF.msb;
-    break;
-    default: 
-      return 0;
-  }
-
-  uint8_t z_flag = (result == 0) ? 0b1000 : 0b0000;
-  uint8_t n_flag = 0b0100;
-  uint8_t h_flag = (half_carry) ? 0b0010 : 0b0000;
-  uint8_t c_flag = C_FLAG(cpu->AF.lsb);
-  cpu->AF.lsb = (z_flag | n_flag | h_flag | c_flag) << 4;
+  uint8_t *reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  alu_result_t alu_result = alu_sub(*reg8bits, 1);
+  *reg8bits = alu_result.result;
+  uint8_t z_flag = (alu_result.result == 0) ? 1 : 0;
+  uint8_t n_flag = 1;
+  uint8_t h_flag = (alu_result.has_half_carry) ? 1 : 0;
+  uint8_t c_flag = C_FLAG_VALUE(cpu->AF.lsb);
+  cpu->AF.lsb = JOIN_FLAGS(z_flag, n_flag, h_flag, c_flag);
   return 1;
 }
 
 uint8_t INC_r(sm83_t *cpu, bus_t *busAddr) {
-  alu_result_t result;
-  switch(cpu->opcode) {
-    case 0x04:
-      result = alu_add(cpu->BC.msb, 1);
-      cpu->BC.msb = result.result;
-    break;
-    case 0x14:
-      result = alu_add(cpu->DE.msb, 1);
-      cpu->DE.msb = result.result;
-    break;
-    case 0x24:
-      result = alu_add(cpu->HL.msb, 1);
-      cpu->HL.msb = result.result;
-    break;
-    case 0x0C:
-      result = alu_add(cpu->BC.lsb, 1);
-      cpu->BC.lsb = result.result;
-    break;
-    case 0x1C:
-      result = alu_add(cpu->DE.lsb, 1);
-      cpu->DE.lsb = result.result;
-    break;
-    case 0x2C:
-      result = alu_add(cpu->HL.lsb, 1);
-      cpu->HL.lsb = result.result;
-    break;
-    case 0x3C:
-      result = alu_add(cpu->AF.msb, 1);
-      cpu->AF.msb = result.result;
-    break;
-    default:
-      return 0;
-  }
+  uint8_t *reg8bits = get_opcode_register(cpu, MAIN_REGISTER_IDX(cpu->opcode));
+  alu_result_t result = alu_add(*reg8bits, 1);
+  *reg8bits = result.result;
   uint8_t z_flag = (result.result == 0) ? 1 : 0;
   uint8_t n_flag =  0;
   uint8_t h_flag = (result.has_half_carry) ? 1 : 0;
@@ -495,17 +400,15 @@ uint8_t INC_r(sm83_t *cpu, bus_t *busAddr) {
 }
 
 uint8_t ADD_r(sm83_t *cpu, bus_t *busAddr) {
-  if(cpu->opcode == 0x80) {
-    alu_result_t data = alu_add(cpu->AF.msb, cpu->BC.msb);
-    cpu->AF.msb = data.result;
-    uint8_t z_flag = (data.result == 0) ? 1 : 0;
-    uint8_t n_flag =  0;
-    uint8_t h_flag = (data.has_half_carry) ? 1 : 0;
-    uint8_t c_flag = (data.has_carry) ? 1 : 0;
-    cpu->AF.lsb = JOIN_FLAGS(z_flag, n_flag, h_flag, c_flag);
-    return 1;
-  }
-  return 0;
+  uint8_t *reg8bits = get_opcode_register(cpu, SECOND_REGISTER_IDX(cpu->opcode));
+  alu_result_t data = alu_add(cpu->AF.msb, *reg8bits);
+  cpu->AF.msb = data.result;
+  uint8_t z_flag = (data.result == 0) ? 1 : 0;
+  uint8_t n_flag =  0;
+  uint8_t h_flag = (data.has_half_carry) ? 1 : 0;
+  uint8_t c_flag = (data.has_carry) ? 1 : 0;
+  cpu->AF.lsb = JOIN_FLAGS(z_flag, n_flag, h_flag, c_flag);
+  return 1;
 }
 
 //FLOW CONTROLL
@@ -591,16 +494,17 @@ uint8_t CALL_cc_nn(sm83_t *cpu, bus_t *busAddr) {
 uint8_t RLCA(sm83_t *cpu, bus_t *busAddr) {
   alu_result_t result = alu_rotate_left_circular(cpu->AF.msb);
   cpu->AF.msb = result.result;
-  cpu->AF.lsb = result.has_carry ? 0x10 : 0x00;
+  uint8_t h_flag = result.has_carry ? 1 : 0;
+  cpu->AF.lsb = JOIN_FLAGS(0, 0, h_flag, 0);
   return 1;
 }
 
 uint8_t RRCA(sm83_t *cpu, bus_t *busAddr) {
   uint8_t reg_a_value = cpu->AF.msb;
-  uint8_t b0 = (0b00000001 & reg_a_value);
-  uint8_t rest = (0b11111110 & reg_a_value) >> 1;
-  cpu->AF.msb = (b0 << 7) | rest;
-  cpu->AF.lsb = (b0 == 0) ? 0x00 : 0x10;
+  alu_result_t result = alu_rotate_right_circular(cpu->AF.msb);
+  cpu->AF.msb = result.result;
+  uint8_t h_flag = result.has_carry ? 1 : 0;
+  cpu->AF.lsb = JOIN_FLAGS(0, 0, h_flag, 0);
   return 1;
 }
 
